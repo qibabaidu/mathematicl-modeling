@@ -1,0 +1,61 @@
+#include <iostream>
+#include <ceres/ceres.h>
+#include <glog/logging.h>
+#include <gflags/gflags.h>
+#include <vector>
+
+using namespace std;
+using  ceres::AutoDiffCostFunction;
+using  ceres::CostFunction;
+using  ceres::Problem;
+using  ceres::Solver;
+using  ceres::Solve;
+
+struct Target_X {
+    template <typename T> bool operator()( const T* const x, const T* const y, T* residual) const {
+        residual[0] = 3.0*x[0]*x[0] +6.0*x[0]-9.0;
+
+        return true;
+    }
+};
+
+struct Target_Y {
+    template <typename T> bool operator()( const T* const x, const T* const y, T* residual) const {
+        residual[0] = -3.0*y[0]*y[0] +6.0*y[0];
+
+        return true;
+    }
+};
+
+int main(int argc, char *argv[])
+{
+   // CERES_GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
+    google::InitGoogleLogging(argv[0]);
+    double x =  1.5;
+    double y =  0.4;
+
+    Problem problem;
+
+    problem.AddResidualBlock(new AutoDiffCostFunction<Target_X, 1, 1, 1>(new Target_X),
+                            NULL, &x, &y);
+    problem.AddResidualBlock(new AutoDiffCostFunction<Target_Y, 1, 1, 1>(new Target_Y),
+                            NULL, &x, &y);
+
+    Solver::Options options;
+    options.minimizer_progress_to_stdout = true;
+    options.max_num_iterations = 100;
+    options.linear_solver_type = ceres::DENSE_QR;
+
+    Solver::Summary summary;
+    Solve(options, &problem, &summary);
+
+    cout<<summary.BriefReport()<<"\n";
+    cout<<"Final x = "<<x<<" ,y = "<<y<<endl;
+
+    return 0;
+}
+
+
+
+
+
