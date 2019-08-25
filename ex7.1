@@ -2,7 +2,7 @@ from scipy import stats
 import numpy as np
 import math
 
-x0=[506,508,499,503,504,510,497,512,514,505,493,506,509,596]
+x0=[506,508,499,503,504,510,497,512,514,505,493,506,509,496]
 n,min_max,mean,var,skew,kurt=stats.describe(x0)
 # 发现直接用np.std精度与math.sqrt不同
 std=math.sqrt(var)
